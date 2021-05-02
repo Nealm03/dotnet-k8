@@ -1,0 +1,1 @@
+docker build . -t nealmorris/dotnetk8:dev
