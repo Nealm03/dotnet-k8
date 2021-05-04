@@ -96,7 +96,7 @@ test-app-api:
 
   ingress:
     enabled: true
-    annotations:te pd
+    annotations:
       nginx.ingress.kubernetes.io/rewrite-target: "/"
     hosts:
       - host: kubernetes.docker.internal
