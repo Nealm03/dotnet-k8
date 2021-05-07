@@ -81,8 +81,15 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+global:
+  # Environment variables shared between all the pods, populated with valueFrom: fieldRef
+  envValuesFrom:
+    Runtime__IpAddress: status.podIP
 
 test-app-api:
+  env:
+    "ASPNETCORE_ENVIRONMENT": "Staging"
+    "ASPNETCORE_FORWADEDHEADERS_ENABLED": "true"
   replicaCount: 1
   image:
     repository: nealmorris/dotnetk8
@@ -97,11 +104,11 @@ test-app-api:
   ingress:
     enabled: true
     annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: "/"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
     hosts:
       - host: kubernetes.docker.internal
         paths:
-        - path: /my-test-app
+        - path: /my-test-app(/|$)(.*)
           pathType: Prefix
   autoscaling:
     enabled: false

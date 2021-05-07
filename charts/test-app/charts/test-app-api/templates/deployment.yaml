@@ -38,17 +38,33 @@ spec:
               containerPort: 5000
               protocol: TCP
           env:
-          - name: "ASPNETCORE_ENVIRONMENT"
-            value: "Staging"
-          - name: "ASPNETCORE_FORWARDEDHEADERS_ENABLED"
-            value: "true"
+          {{ range $k, $v := .Values.env }}
+            - name: {{ $k | quote }}
+              value: {{ $v | quote }}
+          {{- end }}
+          {{ range $k, $v := .Values.global.envValuesFrom }}
+            - name: {{ $k | quote }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: {{ $v | quote }}
+          {{- end }}
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: http
+            failureThreshold: 30
+            periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /healthy
               port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /
+              path: /ready
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
