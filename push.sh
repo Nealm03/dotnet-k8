@@ -1,0 +1,1 @@
+docker push nealmorris/dotnetk8:1.16.0

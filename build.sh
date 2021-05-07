@@ -1,1 +1,1 @@
-docker build . -t nealmorris/dotnetk8:dev
+docker build . -t nealmorris/dotnetk8:1.16.0
