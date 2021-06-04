@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Prometheus;
 
 namespace dotnetk8
 {
@@ -25,7 +26,7 @@ namespace dotnetk8
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
     {
-      services.AddHealthChecks();
+      services.AddHealthChecks().ForwardToPrometheus();
       services.AddControllers();
       services.Configure<Config>(configuration.GetSection("Config"));
       services.Configure<ForwardedHeadersOptions>(options =>
@@ -33,6 +34,8 @@ namespace dotnetk8
         options.ForwardedHeaders =
               ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
       });
+      
+      services.AddGrpc();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,11 +46,13 @@ namespace dotnetk8
         app.UseDeveloperExceptionPage();
       }
 
-      app.UseForwardedHeaders(); 
+      app.UseForwardedHeaders();
       app.UseRouting();
-
+      app.UseMetricServer();
+      app.UseHttpMetrics();
       app.UseEndpoints(endpoints =>
       {
+     
         endpoints.MapHealthChecks("/health/startup");
         endpoints.MapHealthChecks("/healthy");
         endpoints.MapHealthChecks("/ready");
@@ -57,6 +62,9 @@ namespace dotnetk8
           var msg = $"hello {config.Value.Env}";
           await context.Response.WriteAsync(msg);
         });
+
+        endpoints.MapGrpcService<OrderService>();
+        endpoints.MapMetrics();
         endpoints.MapControllers();
       });
     }

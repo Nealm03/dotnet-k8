@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option csharp_namespace = "dotnetk8";
+
+package order;
+
+service OrderGrpcService {
+  rpc GetOrder (OrderQuery) returns (OrderResult);
+}
+
+message OrderQuery {
+  string id = 1;
+}
+
+message OrderResult {
+  string id = 1;
+}
